@@ -1,0 +1,115 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+export PATH="/opt/homebrew/bin:$PATH"
+# Homebrew 南科大镜像源 (Git 协议)
+export HOMEBREW_API_DOMAIN="https://mirrors.sustech.edu.cn/homebrew-bottles/api"
+export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.sustech.edu.cn/homebrew-bottles"
+export HOMEBREW_BREW_GIT_REMOTE="git://mirrors.sustech.edu.cn/git/homebrew/brew.git"
+export HOMEBREW_CORE_GIT_REMOTE="git://mirrors.sustech.edu.cn/git/homebrew/homebrew-core.git"
+export HOMEBREW_PIP_INDEX_URL="https://mirrors.sustech.edu.cn/pypi/simple"
+
+# zinit
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
+[ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+source "${ZINIT_HOME}/zinit.zsh"
+
+# Powerlevel10k 主题
+zinit ice depth=1
+zinit light romkatv/powerlevel10k
+
+# 语法高亮
+zinit load zdharma-continuum/history-search-multi-word
+zinit light zsh-users/zsh-syntax-highlighting
+
+# 自动补全
+zinit ice wait lucid atload'_zsh_autosuggest_start'
+zinit light zsh-users/zsh-autosuggestions
+#zinit light zsh-users/zsh-completions
+zinit ice blockf
+
+HISTSIZE=10000 #历史记录的最大值
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE   #最大存储条数
+HISTDUP=erase        #删除重复的记录
+setopt appendhistory #追加历史记录
+setopt sharehistory  #共享历史记录
+setopt hist_ignore_space
+setopt hist_ignore_all_dups #忽略重复的记录
+setopt hist_save_no_dups    #不存储重复的记录
+setopt hist_ignore_dups     #忽略重复的记录
+setopt hist_find_no_dups    #不查找重复的记录
+# 快捷命令的定义
+alias c='clear' # 清屏
+alias q='exit'  #退出终端
+
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# ssh
+alias sshcheck="ssh -T git@github.com"
+
+export PIP_INDEX_URL="https://mirrors.sustech.edu.cn/pypi/simple"
+export BAT_THEME="tokyonight_night" # bat 主题
+
+# fzf
+eval "$(fzf --zsh)"
+export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git" #显示隐藏文件,同时排除gitignore所忽略的文件
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"  # ctrl+t 启动fzf
+export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always --line-range :500 {}'" #ctrl+t预览文件内容,显示500行
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always{} | head -200'" #alt+t预览文件内容_fzf
+_fzf_comprun(){
+  local command=$1
+  shift
+
+  case "$command" in #设置预览命令,通过一个switch case语句来区分不同的命令
+  cd)           fzf --preview 'eza --tree --color=always {}|head -200' "$@" ;; #会以树状结构展示文件
+  export|unset) fzf --preveiw "eval 'echo \$' {}"                       "$@" ;;
+  ssh)          fzf --preview 'dig {}'                                  "$@" ;;
+  *)            fzf --preview "--preview 'bat -n --color=always --line-range :500 {}'" "$@" ;;
+  esac
+}
+_fzf_compgen_path(){
+  fd --hidden --exclude .git . "$1" 
+}
+_fzf_compgen_dir(){
+  fd --type=d --hidden --exclude .git . "$1" #自动补全文件路径
+}
+#source ~/fzf-git.sh/fzf-git.sh
+
+# the fuck
+eval $(thefuck --alias)
+eval $(thefuck --alias fk)
+
+# zoxide (better cd)
+eval "$(zoxide init zsh)"
+alias cd="z"
+# bat (better cat)
+alias cat="bat"
+export BAT_THEME="tokyonight_night" # 设置主题
+# eza (better ls)
+alias ls="eza -a --color=always --long --git --no-filesize --icons=always --no-time --no-user --no-permissions --git-ignore --git-repos-no-status"
+
+
+# 历史记录的设置
+HISTSIZE=10000  #历史记录的最大值
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE  #最大存储条数
+HISTDUP=erase #删除重复的记录
+setopt appendhistory #追加历史记录
+setopt sharehistory #共享历史记录
+setopt hist_ignore_space
+setopt hist_ignore_all_dups #忽略重复的记录
+setopt hist_save_no_dups #不存储重复的记录
+setopt hist_ignore_dups  #忽略重复的记录
+setopt hist_find_no_dups #不查找重复的记录
+# 快捷命令的定义
+alias c='clear' # 清屏
+alias q='exit'  #退出终端
+
