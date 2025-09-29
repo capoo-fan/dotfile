@@ -177,7 +177,5 @@ alias tailwind="npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --wa
 
 alias sshconnect="ssh 'qianfu@10.250.209.225'"
 
-set -Ux GITHUB_TOKEN "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"
-
 
 set -x PIP_INDEX_URL "https://mirrors.sustech.edu.cn/pypi/simple"
